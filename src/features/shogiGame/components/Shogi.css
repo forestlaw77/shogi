@@ -1,0 +1,6 @@
+.selected-piece {
+  background-color: rgba(255, 255, 0, 0.5);
+}
+.movable-cell {
+  background-color: rgba(255, 165, 0, 0.5);
+}
