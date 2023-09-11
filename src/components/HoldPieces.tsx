@@ -59,7 +59,9 @@ const HoldPieces: React.FC<HoldPiecesProps> = ({
           }
 
           const pieceClassName =
-            selectedHoldPiece && selectedHoldPiece.type === pieceType
+            selectedHoldPiece &&
+            selectedHoldPiece.type === pieceType &&
+            selectedHoldPiece.direction === direction
               ? "selected-piece"
               : "";
 

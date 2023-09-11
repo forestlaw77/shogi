@@ -7,7 +7,7 @@ import { isMovable } from "../utils/boardUtils";
 interface BoardProps {
   board: Piece[][];
   handleCellClick: (row: number, col: number, cell: Piece) => void;
-  selectedPiece: { row: number; col: number; cell: Piece } | null;
+  selectedPiece: { row: number; col: number } | null;
   movableCells: number[][];
 }
 

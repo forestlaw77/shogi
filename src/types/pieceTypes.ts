@@ -33,3 +33,8 @@ export interface Piece {
   type: PieceType;
   direction: DirType;
 }
+
+export enum Player {
+  black = DirType.Up,
+  white = DirType.Down,
+}

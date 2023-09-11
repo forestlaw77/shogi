@@ -1,5 +1,11 @@
-import { PieceType, DirType } from "../types/pieceTypes.ts";
+import { PieceType } from "../types/pieceTypes.ts";
 
+// Constants
+
+// The number of milliseconds for double tap delay.
+export const TAP_DELAY = 250;
+
+// Dimensions of the shogi board and pieces.
 export const BOARD_SIZE = {
   padding: 30 * (375 / 600),
   width: 540 * (375 / 600),
@@ -12,6 +18,7 @@ export const PIECE_SIZE = {
   height: 62 * (375 / 600),
 };
 
+// Directions for possible piece moves.
 export const PIECE_DIRECTIONS = [
   [0, -1],
   [1, -1],
@@ -25,6 +32,7 @@ export const PIECE_DIRECTIONS = [
   [-1, -2],
 ];
 
+// Movable ranges for different piece types.
 export const MOVABLE_RANGES: { [key in PieceType]: number[] } = {
   [PieceType.None]: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   [PieceType.King1]: [1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
@@ -44,245 +52,116 @@ export const MOVABLE_RANGES: { [key in PieceType]: number[] } = {
   [PieceType.PromotedPawn]: [1, 1, 1, 0, 1, 0, 1, 1, 0, 0],
 };
 
+// Mapping of pieces that can be promoted.
+export const PROMOTION_PIECES: { [key in PieceType]?: PieceType } = {
+  [PieceType.Pawn]: PieceType.PromotedPawn,
+  [PieceType.Lance]: PieceType.PromotedLance,
+  [PieceType.Knight]: PieceType.PromotedKnight,
+  [PieceType.Silver]: PieceType.PromotedSilver,
+  [PieceType.Rook]: PieceType.PromotedRook,
+  [PieceType.Bishop]: PieceType.PromotedBishop,
+};
+
+// Mapping of promoted pieces to their original forms.
+export const ORIGINAL_PIECES: { [key in PieceType]?: PieceType } = {
+  [PieceType.PromotedPawn]: PieceType.Pawn,
+  [PieceType.PromotedLance]: PieceType.Lance,
+  [PieceType.PromotedKnight]: PieceType.Knight,
+  [PieceType.PromotedSilver]: PieceType.Silver,
+  [PieceType.PromotedRook]: PieceType.Rook,
+  [PieceType.PromotedBishop]: PieceType.Bishop,
+};
+
+// Definition of all shogi piece types.
 export const PIECES = [
   {
     type: PieceType.King1,
-    promoted: PieceType.None,
-    orgType: PieceType.King1,
-    direction: DirType.Up,
-    image: "u_king1.png",
+    UpImage: "u_king1.png",
+    DownImage: "d_king1.png",
     movableRange: MOVABLE_RANGES[PieceType.King1],
   },
   {
     type: PieceType.King2,
-    promoted: PieceType.None,
-    orgType: PieceType.King2,
-    direction: DirType.Up,
-    image: "u_king2.png",
+    UpImage: "u_king2.png",
+    DownImage: "d_king2.png",
     movableRange: MOVABLE_RANGES[PieceType.King2],
   },
   {
     type: PieceType.Rook,
-    promoted: PieceType.PromotedRook,
-    orgType: PieceType.Rook,
-    direction: DirType.Up,
-    image: "u_rook.png",
+    UpImage: "u_rook.png",
+    DownImage: "d_rook.png",
     movableRange: MOVABLE_RANGES[PieceType.Rook],
   },
   {
     type: PieceType.Bishop,
-    promoted: PieceType.PromotedBishop,
-    orgType: PieceType.Bishop,
-    direction: DirType.Up,
-    image: "u_bishop.png",
+    UpImage: "u_bishop.png",
+    DownImage: "d_bishop.png",
     movableRange: MOVABLE_RANGES[PieceType.Bishop],
   },
   {
     type: PieceType.Gold,
-    promoted: PieceType.None,
-    orgType: PieceType.Gold,
-    direction: DirType.Up,
-    image: "u_gold.png",
+    UpImage: "u_gold.png",
+    DownImage: "d_gold.png",
     movableRange: MOVABLE_RANGES[PieceType.Gold],
   },
   {
     type: PieceType.Silver,
-    promoted: PieceType.PromotedSilver,
-    orgType: PieceType.Silver,
-    direction: DirType.Up,
-    image: "u_silver.png",
+    UpImage: "u_silver.png",
+    DownImage: "d_silver.png",
     movableRange: MOVABLE_RANGES[PieceType.Silver],
   },
   {
     type: PieceType.Knight,
-    promoted: PieceType.PromotedKnight,
-    orgType: PieceType.Knight,
-    direction: DirType.Up,
-    image: "u_knight.png",
+    UpImage: "u_knight.png",
+    DownImage: "d_knight.png",
     movableRange: MOVABLE_RANGES[PieceType.Knight],
   },
   {
     type: PieceType.Lance,
-    promoted: PieceType.PromotedLance,
-    orgType: PieceType.Lance,
-    direction: DirType.Up,
-    image: "u_lance.png",
+    UpImage: "u_lance.png",
+    DownImage: "d_lance.png",
     movableRange: MOVABLE_RANGES[PieceType.King1],
   },
   {
     type: PieceType.Pawn,
-    promoted: PieceType.PromotedPawn,
-    orgType: PieceType.Pawn,
-    direction: DirType.Up,
-    image: "u_pawn.png",
+    UpImage: "u_pawn.png",
+    DownImage: "d_pawn.png",
     movableRange: MOVABLE_RANGES[PieceType.Lance],
   },
   {
     type: PieceType.PromotedRook,
-    promoted: PieceType.None,
-    orgType: PieceType.Rook,
-    direction: DirType.Up,
-    image: "u_p_rook.png",
+    UpImage: "u_p_rook.png",
+    DownImage: "d_p_rook.png",
     movableRange: MOVABLE_RANGES[PieceType.PromotedRook],
   },
   {
     type: PieceType.PromotedBishop,
-    promoted: PieceType.None,
-    orgType: PieceType.Bishop,
-    direction: DirType.Up,
-    image: "u_p_bishop.png",
+    UpImage: "u_p_bishop.png",
+    DownImage: "d_p_bishop.png",
     movableRange: MOVABLE_RANGES[PieceType.PromotedBishop],
   },
   {
     type: PieceType.PromotedSilver,
-    promoted: PieceType.None,
-    orgType: PieceType.Silver,
-    direction: DirType.Up,
-    image: "u_p_silver.png",
+    UpImage: "u_p_silver.png",
+    DownImage: "u_p_silver.png",
     movableRange: MOVABLE_RANGES[PieceType.PromotedSilver],
   },
   {
     type: PieceType.PromotedKnight,
-    promoted: PieceType.None,
-    orgType: PieceType.Knight,
-    direction: DirType.Up,
-    image: "u_p_knight.png",
+    UpImage: "u_p_knight.png",
+    DownImage: "d_p_knight.png",
     movableRange: MOVABLE_RANGES[PieceType.PromotedKnight],
   },
   {
     type: PieceType.PromotedLance,
-    promoted: PieceType.None,
-    orgType: PieceType.Lance,
-    direction: DirType.Up,
-    image: "u_p_lance.png",
+    UpImage: "u_p_lance.png",
+    DownImage: "d_p_lance.png",
     movableRange: MOVABLE_RANGES[PieceType.PromotedLance],
   },
   {
     type: PieceType.PromotedPawn,
-    promoted: PieceType.None,
-    orgType: PieceType.Pawn,
-    direction: DirType.Up,
-    image: "u_p_pawn.png",
-    movableRange: MOVABLE_RANGES[PieceType.PromotedPawn],
-  },
-  {
-    type: PieceType.King1,
-    promoted: PieceType.None,
-    orgType: PieceType.King1,
-    direction: DirType.Down,
-    image: "d_king1.png",
-    movableRange: MOVABLE_RANGES[PieceType.King1],
-  },
-  {
-    type: PieceType.King2,
-    promoted: PieceType.None,
-    orgType: PieceType.King2,
-    direction: DirType.Down,
-    image: "d_king2.png",
-    movableRange: MOVABLE_RANGES[PieceType.King2],
-  },
-  {
-    type: PieceType.Rook,
-    promoted: PieceType.PromotedRook,
-    orgType: PieceType.Rook,
-    direction: DirType.Down,
-    image: "d_rook.png",
-    movableRange: MOVABLE_RANGES[PieceType.Rook],
-  },
-  {
-    type: PieceType.Bishop,
-    promoted: PieceType.PromotedBishop,
-    orgType: PieceType.Bishop,
-    direction: DirType.Down,
-    image: "d_bishop.png",
-    movableRange: MOVABLE_RANGES[PieceType.Bishop],
-  },
-  {
-    type: PieceType.Gold,
-    promoted: PieceType.None,
-    orgType: PieceType.Gold,
-    direction: DirType.Down,
-    image: "d_gold.png",
-    movableRange: MOVABLE_RANGES[PieceType.Gold],
-  },
-  {
-    type: PieceType.Silver,
-    promoted: PieceType.PromotedSilver,
-    orgType: PieceType.Silver,
-    direction: DirType.Down,
-    image: "d_silver.png",
-    movableRange: MOVABLE_RANGES[PieceType.Silver],
-  },
-  {
-    type: PieceType.Knight,
-    promoted: PieceType.PromotedKnight,
-    orgType: PieceType.Knight,
-    direction: DirType.Down,
-    image: "d_knight.png",
-    movableRange: MOVABLE_RANGES[PieceType.Knight],
-  },
-  {
-    type: PieceType.Lance,
-    promoted: PieceType.PromotedLance,
-    orgType: PieceType.Lance,
-    direction: DirType.Down,
-    image: "d_lance.png",
-    movableRange: MOVABLE_RANGES[PieceType.Lance],
-  },
-  {
-    type: PieceType.Pawn,
-    promoted: PieceType.PromotedPawn,
-    orgType: PieceType.Pawn,
-    direction: DirType.Down,
-    image: "d_pawn.png",
-    movableRange: MOVABLE_RANGES[PieceType.Pawn],
-  },
-  {
-    type: PieceType.PromotedRook,
-    promoted: PieceType.None,
-    orgType: PieceType.Rook,
-    direction: DirType.Down,
-    image: "d_p_rook.png",
-    movableRange: MOVABLE_RANGES[PieceType.PromotedRook],
-  },
-  {
-    type: PieceType.PromotedBishop,
-    promoted: PieceType.None,
-    orgType: PieceType.Bishop,
-    direction: DirType.Down,
-    image: "d_p_bishop.png",
-    movableRange: MOVABLE_RANGES[PieceType.PromotedBishop],
-  },
-  {
-    type: PieceType.PromotedSilver,
-    promoted: PieceType.None,
-    orgType: PieceType.Silver,
-    direction: DirType.Down,
-    image: "d_p_silver.png",
-    movableRange: MOVABLE_RANGES[PieceType.PromotedSilver],
-  },
-  {
-    type: PieceType.PromotedKnight,
-    promoted: PieceType.None,
-    orgType: PieceType.Knight,
-    direction: DirType.Down,
-    image: "d_p_knight.png",
-    movableRange: MOVABLE_RANGES[PieceType.PromotedKnight],
-  },
-  {
-    type: PieceType.PromotedLance,
-    promoted: PieceType.None,
-    orgType: PieceType.Lance,
-    direction: DirType.Down,
-    image: "d_p_lance.png",
-    movableRange: MOVABLE_RANGES[PieceType.PromotedLance],
-  },
-  {
-    type: PieceType.PromotedPawn,
-    promoted: PieceType.None,
-    orgType: PieceType.Pawn,
-    direction: DirType.Down,
-    image: "d_p_pawn.png",
+    UpImage: "u_p_pawn.png",
+    DownImage: "d_p_pawn.png",
     movableRange: MOVABLE_RANGES[PieceType.PromotedPawn],
   },
 ];

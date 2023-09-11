@@ -1,17 +1,19 @@
 import { useState } from "react";
+import { Box, Button } from "@chakra-ui/react";
 import "./Shogi.css";
-import { PieceType, DirType, Piece } from "../../../types/pieceTypes";
+import { PieceType, DirType, Piece, Player } from "../../../types/pieceTypes";
 import {
   BOARD_SIZE,
   MOVABLE_RANGES,
-  PIECES,
   PIECE_DIRECTIONS,
+  PIECE_SIZE,
+  ORIGINAL_PIECES,
 } from "../../../constants/constants";
 import {
-  generateInitialBoard,
   isMovable,
   getPromotedPieceType,
   isNifu,
+  handleCellClick,
 } from "../../../utils/boardUtils";
 import HoldPieces from "../../../components/HoldPieces";
 import Board from "../../../components/Board";
@@ -66,21 +68,32 @@ const isOwnPiece = (
   return board[row][col].direction === direction;
 };
 
+interface ShogiProps {
+  initialBoard: Piece[][];
+  initialHoldPieces: Piece[];
+  isFreeMode: boolean;
+}
+
 /**
  * The main Shogi component that manages the game state and logic.
  */
-const Shogi = () => {
-  const [board, setBoard] = useState(generateInitialBoard());
-  const [holdPieces, setHoldPieces] = useState<Piece[]>([]);
+const Shogi: React.FC<ShogiProps> = ({
+  initialBoard,
+  initialHoldPieces,
+  isFreeMode,
+}) => {
+  const [board, setBoard] = useState(initialBoard);
+  const [holdPieces, setHoldPieces] = useState<Piece[]>(initialHoldPieces);
   const [selectedPiece, setSelectedPiece] = useState<{
     row: number;
     col: number;
-    cell: Piece;
   } | null>(null);
   const [movableCells, setMovableCells] = useState<number[][]>([]);
   const [selectedHoldPiece, setSelectedHoldPiece] = useState<Piece | null>(
     null
   );
+  const [currentPlayer, setCurrentPlayer] = useState<number>(Player.black);
+  const [isFree, setIsFree] = useState(isFreeMode);
 
   /**
    * Calculates the valid movable cells for a selected piece and updates the state.
@@ -129,131 +142,220 @@ const Shogi = () => {
    *
    * @param {number} row - The row index of the clicked cell.
    * @param {number} col - The column index of the clicked cell.
-   * @param {Cell} cell - The cell that was clicked.
    */
-  const handleCellClick = (row: number, col: number, cell: Piece) => {
-    const newBoard = structuredClone(board);
-
+  const singleClickFunc = (row: number, col: number) => {
     if (selectedHoldPiece) {
-      if (newBoard[row][col].type === PieceType.None) {
-        if (isNifu(col, selectedHoldPiece, board)) {
-          alert("二歩は反則です。");
-        } else {
-          newBoard[row][col] = selectedHoldPiece;
-          holdPieces.splice(holdPieces.indexOf(selectedHoldPiece));
-          setHoldPieces([...holdPieces]);
-          setBoard(newBoard);
-        }
-      }
-      setSelectedHoldPiece(null);
-      return;
-    }
-
-    if (selectedPiece && selectedPiece.cell) {
-      if (selectedPiece.row === row && selectedPiece.col === col) {
-        setSelectedPiece(null);
-        setMovableCells([]);
-        return;
-      }
-      if (isMovable(row, col, movableCells)) {
-        const promoted = getPromotedPieceType(
-          row,
-          selectedPiece.row,
-          selectedPiece.cell
-        );
-        if (promoted === PieceType.None) {
-          newBoard[row][col] = selectedPiece.cell;
-        } else {
-          let shouldPromote = false;
-          console.log(cell.type, cell.direction, row);
-          if (
-            ((selectedPiece.cell.type === PieceType.Pawn ||
-              selectedPiece.cell.type === PieceType.Lance) &&
-              ((selectedPiece.cell.direction === DirType.Up && row === 0) ||
-                (selectedPiece.cell.direction === DirType.Down &&
-                  row === 8))) ||
-            (selectedPiece.cell.type === PieceType.Knight &&
-              ((selectedPiece.cell.direction === DirType.Up && row < 2) ||
-                (selectedPiece.cell.direction === DirType.Down && row > 6)))
-          ) {
-            shouldPromote = true;
-          } else {
-            shouldPromote = window.confirm("成りますか？");
-          }
-
-          if (shouldPromote) {
-            newBoard[row][col] = { ...selectedPiece.cell, type: promoted };
-          } else {
-            newBoard[row][col] = selectedPiece.cell;
-          }
-        }
-        newBoard[selectedPiece.row][selectedPiece.col] = {
-          type: PieceType.None,
-          direction: DirType.None,
-        };
-        if (
-          board[row][col].type !== PieceType.None &&
-          board[row][col].direction !== selectedPiece.cell.direction
-        ) {
-          const newHoldPieces = [...holdPieces];
-          const pieceInfo = PIECES.find(
-            (piece) => piece.type === board[row][col].type
-          );
-          if (!pieceInfo) {
-            console.error("pieceInfo not Found (ShogiGame, handleCellClick)");
-            newHoldPieces.push({
-              ...board[row][col],
-              direction: selectedPiece.cell.direction,
-            });
-          } else {
-            newHoldPieces.push({
-              type: pieceInfo.orgType,
-              direction: selectedPiece.cell.direction,
-            });
-          }
-
-          setHoldPieces(newHoldPieces);
-        }
-        setBoard(newBoard);
-        setSelectedPiece(null);
-        setMovableCells([]);
-      }
-    } else {
-      if (cell !== null && cell.type !== PieceType.None) {
-        setSelectedPiece({ row: row, col: col, cell: cell });
-        calculateMovableCells(row, col, cell);
+      // Handle putting a hold piece
+      handleHoldPiecePut(row, col, board);
+    } else if (selectedPiece) {
+      // Handle putting a selected piece
+      handleSelectPiecePut(row, col, board, false);
+    } else if (board[row][col].type !== PieceType.None) {
+      if (isFree || (!isFree && board[row][col].direction === currentPlayer)) {
+        // Select a piece and calculate movable cells
+        setSelectedPiece({ row: row, col: col });
+        calculateMovableCells(row, col, board[row][col]);
       }
     }
   };
 
+  /**
+   * Handles the double click event on a cell, including promoting a selected piece if applicable.
+   *
+   * @param {number} row - The row index of the clicked cell.
+   * @param {number} col - The column index of the clicked cell.
+   */
+  const doubleClickFunc = (row: number, col: number) => {
+    if (selectedPiece) {
+      // Handle putting a selected piece with promotion check
+      handleSelectPiecePut(row, col, board, true);
+    }
+  };
+
+  /**
+   * Handles a click event on a cell in the front-end display, delegating the action to appropriate click functions.
+   *
+   * @param {number} row - The row index of the clicked cell.
+   * @param {number} col - The column index of the clicked cell.
+   */
+  const handleFrontCellClick = (row: number, col: number) => {
+    // Delegate the click action to appropriate click functions
+    handleCellClick(row, col, singleClickFunc, doubleClickFunc);
+  };
+
+  const playerChange = (currentPlayer: Player) => {
+    if (!isFree) {
+      setCurrentPlayer(
+        currentPlayer === Player.black ? Player.white : Player.black
+      );
+    }
+  };
+
+  /**
+   * Handles the placement of a selected piece on the board.
+   *
+   * @param {number} row - The row index where the piece will be placed.
+   * @param {number} col - The column index where the piece will be placed.
+   * @param {Piece[][]} board - The current game board represented as a 2D array of cells.
+   * @param {boolean} autoPromotion - A flag indicating whether auto-promotion should occur.
+   */
+  const handleSelectPiecePut = (
+    row: number,
+    col: number,
+    board: Piece[][],
+    autoPromotion: boolean
+  ) => {
+    if (!selectedPiece) {
+      return;
+    }
+    if (selectedPiece.row === row && selectedPiece.col === col) {
+      setSelectedPiece(null);
+      setMovableCells([]);
+      return;
+    }
+    playerChange(currentPlayer);
+    const newBoard = structuredClone(board);
+    if (isMovable(row, col, movableCells)) {
+      const selectedCell = newBoard[selectedPiece.row][selectedPiece.col];
+      const promoted = getPromotedPieceType(
+        row,
+        selectedPiece.row,
+        selectedCell
+      );
+      if (!promoted) {
+        newBoard[row][col] = selectedCell;
+      } else {
+        let shouldPromote = false;
+        if (
+          autoPromotion ||
+          ((selectedCell.type === PieceType.Pawn ||
+            selectedCell.type === PieceType.Lance) &&
+            ((selectedCell.direction === DirType.Up && row === 0) ||
+              (selectedCell.direction === DirType.Down && row === 8))) ||
+          (selectedCell.type === PieceType.Knight &&
+            ((selectedCell.direction === DirType.Up && row < 2) ||
+              (selectedCell.direction === DirType.Down && row > 6)))
+        ) {
+          shouldPromote = true;
+        } else {
+          shouldPromote = window.confirm("成りますか？");
+        }
+
+        if (shouldPromote) {
+          newBoard[row][col] = { ...selectedCell, type: promoted };
+        } else {
+          newBoard[row][col] = selectedCell;
+        }
+      }
+      newBoard[selectedPiece.row][selectedPiece.col] = {
+        type: PieceType.None,
+        direction: DirType.None,
+      };
+
+      if (
+        board[row][col].type !== PieceType.None &&
+        board[row][col].direction !== selectedCell.direction
+      ) {
+        const newHoldPieces = [...holdPieces];
+
+        newHoldPieces.push({
+          type: ORIGINAL_PIECES[board[row][col].type] || board[row][col].type,
+          direction: selectedCell.direction,
+        });
+
+        setHoldPieces(newHoldPieces);
+      }
+      setBoard(newBoard);
+      setSelectedPiece(null);
+      setMovableCells([]);
+    }
+  };
+
+  /**
+   * Handles the placement of a selected piece from the hold pieces area onto the board.
+   *
+   * @param {number} row - The row index where the piece will be placed.
+   * @param {number} col - The column index where the piece will be placed.
+   * @param {Piece[][]} board - The current game board represented as a 2D array of cells.
+   */
+  const handleHoldPiecePut = (row: number, col: number, board: Piece[][]) => {
+    if (!selectedHoldPiece) {
+      return;
+    }
+    playerChange(currentPlayer);
+    const newBoard = structuredClone(board);
+    if (newBoard[row][col].type === PieceType.None) {
+      if (isNifu(col, selectedHoldPiece, board)) {
+        alert("二歩は反則です。");
+      } else {
+        newBoard[row][col] = selectedHoldPiece;
+        const newHoldPieces = structuredClone(holdPieces);
+        newHoldPieces.splice(
+          newHoldPieces.findIndex(
+            ({ type, direction }) =>
+              type === selectedHoldPiece.type &&
+              direction === selectedHoldPiece.direction
+          ),
+          1
+        );
+        setHoldPieces(newHoldPieces);
+        setBoard(newBoard);
+      }
+    }
+    setSelectedHoldPiece(null);
+  };
+
+  /**
+   * Handles the click event on a piece in the hold pieces area, toggling the selection state.
+   *
+   * @param {Piece} cell - The piece in the hold pieces area that was clicked.
+   */
   const handleHoldPieceClick = (cell: Piece) => {
     if (selectedHoldPiece) {
       setSelectedHoldPiece(null);
     } else {
-      setSelectedHoldPiece(cell);
+      if (isFree || cell.direction === currentPlayer) {
+        setSelectedHoldPiece(cell);
+      }
     }
   };
 
   return (
     <>
-      <HoldPieces
-        holdPieces={holdPieces}
-        direction={DirType.Down}
-        handleOnClick={handleHoldPieceClick}
-        selectedHoldPiece={selectedHoldPiece}
-      />
+      <Box h={PIECE_SIZE.height * 2}>
+        <HoldPieces
+          holdPieces={holdPieces}
+          direction={DirType.Down}
+          handleOnClick={handleHoldPieceClick}
+          selectedHoldPiece={selectedHoldPiece}
+        />
+      </Box>
       <Board
         board={board}
-        handleCellClick={handleCellClick}
+        handleCellClick={handleFrontCellClick}
         selectedPiece={selectedPiece}
         movableCells={movableCells}
       />
-      <HoldPieces
-        holdPieces={holdPieces}
-        direction={DirType.Up}
-        handleOnClick={handleHoldPieceClick}
-        selectedHoldPiece={selectedHoldPiece}
-      />
+      <Box h={PIECE_SIZE.height * 1.5}>
+        <HoldPieces
+          holdPieces={holdPieces}
+          direction={DirType.Up}
+          handleOnClick={handleHoldPieceClick}
+          selectedHoldPiece={selectedHoldPiece}
+        />
+      </Box>
+      {!isFree && (
+        <Box>
+          CurrentPlayer: {currentPlayer === Player.black ? "先手" : "後手"}
+        </Box>
+      )}
+      <Button onClick={() => setIsFree(!isFree)}>
+        {isFree ? "ゲームモードへ" : "盤面編集モードへ"}
+      </Button>
+
+      <Box>
+        「成り」が可能なときに、移動先のセルをダブルタップすると、成ります。
+      </Box>
     </>
   );
 };
