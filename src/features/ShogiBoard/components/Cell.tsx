@@ -1,13 +1,13 @@
 import { Image, Box } from "@chakra-ui/react";
-import { PieceType, Piece } from "../types/pieceTypes";
-import { PIECE_SIZE, BOARD_SIZE } from "../constants/constants";
-import { getImage } from "../utils/boardUtils";
+import { Piece } from "../../../types/pieceTypes";
+import { getImage } from "../../../utils/boardUtils";
+import { BOARD_SIZE, PIECE_SIZE } from "../../../constants/constants";
 
 interface CellProps {
   row: number;
   col: number;
-  cell: Piece;
-  handleCellClick: (row: number, col: number, cell: Piece) => void;
+  cell: Piece | null;
+  handleCellClick: (row: number, col: number, cell: Piece | null) => void;
   isSelected: boolean;
   isMovableCell: boolean;
 }
@@ -26,11 +26,11 @@ interface CellProps {
  */
 const Cell: React.FC<CellProps> = (props) => {
   const { row, col, cell, handleCellClick, isSelected, isMovableCell } = props;
-  const image = getImage(cell.type, cell.direction);
+  const image = cell ? getImage(cell.type, cell.direction) : null;
   const pieceClassName = isSelected ? "selected-piece" : "";
   const cellClassName = isMovableCell ? "movable-cell" : "";
 
-  return cell.type !== PieceType.None ? (
+  return cell && cell.type !== undefined ? (
     <Image
       src={`/images/${image}`}
       alt={cell.type}

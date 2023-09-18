@@ -1,12 +1,12 @@
 import { Box, Image } from "@chakra-ui/react";
-import { BOARD_SIZE } from "../constants/constants";
-import { Piece } from "../types/pieceTypes";
+import { BOARD_SIZE } from "../../../constants/constants";
+import { Piece } from "../../../types/pieceTypes";
 import RenderCell from "./Cell";
-import { isMovable } from "../utils/boardUtils";
+import { isMovable } from "../../../utils/boardUtils";
 
 interface BoardProps {
-  board: Piece[][];
-  handleCellClick: (row: number, col: number, cell: Piece) => void;
+  board: (Piece | null)[][];
+  handleCellClick: (row: number, col: number, cell: Piece | null) => void;
   selectedPiece: { row: number; col: number } | null;
   movableCells: number[][];
 }

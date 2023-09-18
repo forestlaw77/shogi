@@ -1,20 +1,54 @@
+export interface Piece {
+  type: PieceType;
+  owner: PlayerType;
+  direction: DirType;
+}
+
+export interface Cell {
+  row: number;
+  col: number;
+  piece: Piece | null;
+}
+
+export interface Move {
+  srcCell: Cell | null;
+  dstCell: Cell;
+  dropPiece: Piece | null;
+  wantPromote: boolean;
+}
+
+export interface Moved {
+  idx: number;
+  src: { row: number; col: number };
+  dst: { row: number; col: number };
+  type: PieceType;
+  isDropped: boolean;
+  isPromoted: boolean;
+  isSameDst: boolean;
+}
+
+export interface Position {
+  row: number;
+  col: number;
+}
+
 export enum PieceType {
-  None = "", // 駒なし
-  King1 = "王将", // 王将
-  King2 = "玉将", // 玉将
-  Rook = "飛車", // 飛車
-  Bishop = "角行", // 角行
-  Gold = "金将", // 金将
-  Silver = "銀将", // 銀将
-  Knight = "桂馬", // 桂馬
-  Lance = "香車", // 香車
-  Pawn = "歩兵", // 歩兵
-  PromotedRook = "龍王", // 龍王
-  PromotedBishop = "龍馬", // 龍馬
-  PromotedSilver = "成銀", // 成銀
-  PromotedKnight = "成桂", // 成桂
-  PromotedLance = "成香", // 成香
-  PromotedPawn = "と金", // と金
+  None = "無", // 駒なし
+  King1 = "王", // 王将
+  King2 = "玉", // 玉将
+  Rook = "飛", // 飛車
+  Bishop = "角", // 角行
+  Gold = "金", // 金将
+  Silver = "銀", // 銀将
+  Knight = "桂", // 桂馬
+  Lance = "香", // 香車
+  Pawn = "歩", // 歩兵
+  PromotedRook = "龍", // 龍王
+  PromotedBishop = "馬", // 龍馬
+  PromotedSilver = "全", // 成銀
+  PromotedKnight = "圭", // 成桂
+  PromotedLance = "杏", // 成香
+  PromotedPawn = "と", // と金
 }
 
 export enum DirType {
@@ -23,18 +57,24 @@ export enum DirType {
   Down,
 }
 
-export interface Cell {
-  row: number;
-  col: number;
-  piece: Piece;
+export enum PlayerType {
+  None,
+  Black,
+  White,
 }
 
-export interface Piece {
+export interface HoldPiece {
   type: PieceType;
-  direction: DirType;
+  count: number;
 }
 
-export enum Player {
-  black = DirType.Up,
-  white = DirType.Down,
+export interface GameState {
+  board: (Piece | null)[][];
+  prevMove: Moved | null;
+  moveHistoryString: string | null;
+  currentPlayer: PlayerType;
+  holdPieces: {
+    [PlayerType.Black]: HoldPiece[];
+    [PlayerType.White]: HoldPiece[];
+  };
 }

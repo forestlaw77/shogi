@@ -2,10 +2,11 @@ import { useState } from "react";
 import KifuList from "./KifuList";
 import KifuPlay from "./KifuPlay";
 
-const KifuPlayer = () => {
+const KifuPlayer: React.FC<{ onEnd: () => void }> = ({ onEnd }) => {
   const [kifu, setKifu] = useState<string | null>(null);
 
-  const onEnd = () => {
+  const onBack = () => {
+    console.log("onBack");
     setKifu(null);
   };
 
@@ -16,9 +17,9 @@ const KifuPlayer = () => {
   return (
     <>
       {kifu ? (
-        <KifuPlay kifu={kifu} onEnd={onEnd} />
+        <KifuPlay kifu={kifu} onBack={onBack} />
       ) : (
-        <KifuList setKifu={getKifu} />
+        <KifuList setKifu={getKifu} onEnd={onEnd} />
       )}
     </>
   );

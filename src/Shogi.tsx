@@ -2,71 +2,115 @@ import { useState } from "react";
 import { VStack, Box, Image, SimpleGrid, Button } from "@chakra-ui/react";
 import ShogiGame from "./features/shogiGame/components/ShogiGame";
 import KifuPlayer from "./features/kifuPlayer/components/KifuPlayer";
-//import TsumeShogi from "./features/tsumeShogi/components/TsumeShogi";
 import { generateInitialBoard } from "./utils/boardUtils";
-import { PieceType, DirType, Piece } from "./types/pieceTypes";
-//import { PIECES } from "./constants/constants";
+import { PieceType, Piece, PlayerType, GameState } from "./types/pieceTypes";
 
 const Shogi = () => {
-  const [gameType, setGameType] = useState(0);
+  const enum GameType {
+    None,
+    Alone,
+    Ai,
+    Online,
+    KifuPlay,
+    TsumeShogi,
+    Study,
+  }
+  const [gameType, setGameType] = useState<GameType>(GameType.None);
+  const [initialGameState, setInitialGameState] = useState<GameState>({
+    board: generateInitialBoard(),
+    prevMove: null,
+    moveHistoryString: null,
+    currentPlayer: PlayerType.Black,
+    holdPieces: {
+      [PlayerType.Black]: [],
+      [PlayerType.White]: [],
+    },
+  });
 
-  const handleClick = (type: number) => {
+  const handleClick = (type: GameType) => {
     setGameType(type);
+    switch (type) {
+      case GameType.Alone:
+        break;
+      case GameType.Ai:
+        break;
+      case GameType.Online:
+        break;
+      case GameType.KifuPlay:
+        break;
+      case GameType.TsumeShogi:
+        break;
+      case GameType.Study:
+      default:
+        setInitialGameState({
+          ...initialGameState,
+          board: getAllEmptyBoard(),
+          holdPieces: generateAllHoldPieces(),
+        });
+        break;
+    }
   };
 
-  const generateAllPieces = () => {
-    const pieces: Piece[] = [];
+  const generateAllHoldPieces = (): GameState["holdPieces"] => {
+    const holdPieces: GameState["holdPieces"] = {
+      [PlayerType.Black]: [],
+      [PlayerType.White]: [],
+    };
 
-    pieces.push({ type: PieceType.King1, direction: DirType.Up });
-    pieces.push({ type: PieceType.King2, direction: DirType.Down });
-
-    [DirType.Up, DirType.Down].forEach((_) => {
-      for (let i = 0; i < 9; i++) {
-        pieces.push({ type: PieceType.Pawn, direction: _ });
-      }
-      for (let i = 0; i < 2; i++) {
-        pieces.push({ type: PieceType.Gold, direction: _ });
-        pieces.push({ type: PieceType.Silver, direction: _ });
-        pieces.push({ type: PieceType.Knight, direction: _ });
-        pieces.push({ type: PieceType.Lance, direction: _ });
-      }
-      pieces.push({ type: PieceType.Bishop, direction: _ });
-      pieces.push({ type: PieceType.Rook, direction: _ });
+    holdPieces[PlayerType.Black].push({
+      type: PieceType.King1,
+      count: 1,
+    });
+    holdPieces[PlayerType.White].push({
+      type: PieceType.King2,
+      count: 1,
     });
 
-    return pieces;
+    [PlayerType.Black, PlayerType.White].forEach((playerType) => {
+      const player =
+        playerType === PlayerType.Black ? PlayerType.Black : PlayerType.White;
+      holdPieces[player].push({ type: PieceType.Pawn, count: 9 });
+      holdPieces[player].push({ type: PieceType.Gold, count: 2 });
+      holdPieces[player].push({ type: PieceType.Silver, count: 2 });
+      holdPieces[player].push({ type: PieceType.Knight, count: 2 });
+      holdPieces[player].push({ type: PieceType.Lance, count: 2 });
+      holdPieces[player].push({ type: PieceType.Bishop, count: 1 });
+      holdPieces[player].push({ type: PieceType.Rook, count: 1 });
+    });
+
+    return holdPieces;
   };
 
   const getAllEmptyBoard = () => {
-    const emptyCell = {
-      type: PieceType.None,
-      direction: DirType.None,
-      canPromote: false,
-    };
-
     const board: Piece[][] = Array(9)
       .fill(null)
-      .map(() => Array(9).fill({ ...emptyCell }));
+      .map(() => Array(9).fill(null));
 
     return board;
   };
 
+  const onBack = () => {
+    setGameType(GameType.None);
+  };
+
   return (
     <VStack>
-      {gameType ? (
-        gameType === 1 ? (
+      {gameType !== GameType.None ? (
+        gameType === GameType.Alone ? (
           <ShogiGame
-            initialBoard={generateInitialBoard()}
-            initialHoldPieces={[]}
-            isFreeMode={false}
+            initialGameState={initialGameState}
+            mode={false}
+            initialKifu={""}
+            onBack={onBack}
           />
-        ) : gameType === 4 ? (
-          <KifuPlayer />
+        ) : gameType === GameType.KifuPlay ? (
+          <KifuPlayer onEnd={onBack} />
         ) : (
           <ShogiGame
-            initialBoard={getAllEmptyBoard()}
-            initialHoldPieces={generateAllPieces()}
-            isFreeMode={true}
+            initialGameState={initialGameState}
+            mode={true}
+            initialKifu={""}
+            onBack={onBack}
           />
         )
       ) : (
@@ -76,28 +120,37 @@ const Shogi = () => {
             columns={2}
             spacing={10}
             position="absolute"
-            top="50%" /* 上端を中央に配置 */
+            top="25%" /* 上端を中央に配置 */
             left="50%" /* 左端を中央に配置 */
             transform="translate(-50%, -50%)" /* 中央揃え */
             bgColor="rgb(255, 255, 255, 0.5)"
             boxSize="300"
           >
-            <Button size="lg" onClick={() => handleClick(1)}>
+            <Button size="lg" onClick={() => handleClick(GameType.Alone)}>
               一人将棋
             </Button>
-            <Button size="lg">ＡＩ対戦</Button>
+            <Button size="lg" onClick={() => handleClick(GameType.None)}>
+              ＡＩ対戦
+            </Button>
 
-            <Button size="lg">通信対戦</Button>
+            <Button size="lg" onClick={() => handleClick(GameType.None)}>
+              通信対戦
+            </Button>
 
-            <Button size="lg">棋譜再生</Button>
+            <Button size="lg" onClick={() => handleClick(GameType.KifuPlay)}>
+              棋譜再生
+            </Button>
 
-            <Button size="lg" onClick={() => handleClick(4)}>
+            <Button size="lg" onClick={() => handleClick(GameType.None)}>
               詰め将棋
             </Button>
-            <Button size="lg" onClick={() => handleClick(5)}>
+            <Button size="lg" onClick={() => handleClick(GameType.Study)}>
               練習将棋
             </Button>
           </SimpleGrid>
+          <Box boxSize="375">
+            「成り」が可能なときに、移動先のセルをダブルタップすると、成ります。シングルタップすると、不成のままとなります。
+          </Box>
         </Box>
       )}
     </VStack>

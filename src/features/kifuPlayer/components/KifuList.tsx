@@ -1,8 +1,9 @@
 import { Box, Button } from "@chakra-ui/react";
 
-const KifuList: React.FC<{ setKifu: (file: string) => void }> = ({
-  setKifu,
-}) => {
+const KifuList: React.FC<{
+  setKifu: (file: string) => void;
+  onEnd: () => void;
+}> = ({ setKifu, onEnd }) => {
   const kifuList = [
     "everyday_20230901",
     "everyday_20230902",
@@ -14,9 +15,20 @@ const KifuList: React.FC<{ setKifu: (file: string) => void }> = ({
     "everyday_20230908",
     "everyday_20230909",
   ];
-  const handleOnClick = (file: string) => {
+  const handleOnClick = async (file: string) => {
     const fullpath = "/kifu/" + file + ".kif";
-    setKifu(fullpath);
+    try {
+      // ファイルをダウンロード
+      const response = await fetch(fullpath);
+
+      // レスポンスからテキストデータを取得
+      const kifuText = await response.text();
+
+      // kifuText を setKifu で渡す
+      setKifu(kifuText);
+    } catch (error) {
+      console.error("ファイル読み込みエラー:", error);
+    }
   };
 
   const renderKifuList = kifuList.map((file, index) => {
@@ -30,7 +42,12 @@ const KifuList: React.FC<{ setKifu: (file: string) => void }> = ({
     );
   });
 
-  return <Box>{renderKifuList}</Box>;
+  return (
+    <Box>
+      {renderKifuList}
+      <Button onClick={onEnd}>戻る</Button>
+    </Box>
+  );
 };
 
 export default KifuList;

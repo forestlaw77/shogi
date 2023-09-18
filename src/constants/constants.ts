@@ -41,7 +41,7 @@ export const MOVABLE_RANGES: { [key in PieceType]: number[] } = {
   [PieceType.Bishop]: [0, 9, 0, 9, 0, 9, 0, 9, 0, 0],
   [PieceType.Gold]: [1, 1, 1, 0, 1, 0, 1, 1, 0, 0],
   [PieceType.Silver]: [1, 1, 0, 1, 0, 1, 0, 1, 0, 0],
-  [PieceType.Knight]: [0, 0, 0, 0, 0, 0, 0, 0, 2, 2],
+  [PieceType.Knight]: [0, 0, 0, 0, 0, 0, 0, 0, 1, 1],
   [PieceType.Lance]: [9, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   [PieceType.Pawn]: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   [PieceType.PromotedRook]: [9, 1, 9, 1, 9, 1, 9, 1, 0, 0],
@@ -165,3 +165,21 @@ export const PIECES = [
     movableRange: MOVABLE_RANGES[PieceType.PromotedPawn],
   },
 ];
+
+export const pieceLetter = {
+  [PieceType.King1]: "王",
+  [PieceType.King2]: "玉",
+  [PieceType.Rook]: "飛",
+  [PieceType.Bishop]: "角",
+  [PieceType.Gold]: "金",
+  [PieceType.Silver]: "銀",
+  [PieceType.Knight]: "桂",
+  [PieceType.Lance]: "香",
+  [PieceType.Pawn]: "歩",
+  [PieceType.PromotedRook]: "龍",
+  [PieceType.PromotedBishop]: "馬",
+  [PieceType.PromotedSilver]: "成銀",
+  [PieceType.PromotedKnight]: "成桂",
+  [PieceType.PromotedLance]: "成香",
+  [PieceType.PromotedPawn]: "と",
+};
