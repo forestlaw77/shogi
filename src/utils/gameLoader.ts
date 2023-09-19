@@ -1,18 +1,14 @@
+import { Parsers } from "json-kifu-format";
 import {
   DirType,
   GameState,
   Piece,
   PieceType,
   PlayerType,
-} from "../../../types/pieceTypes";
-import ShogiGame from "../../../components/model/Shogi";
-import { Parsers } from "json-kifu-format";
-import { IJSONKifuFormat } from "json-kifu-format/dist/src/Formats";
+} from "../types/pieceTypes";
 
-const KifuPlay: React.FC<{ kifu: string; onBack: () => void }> = ({
-  kifu,
-  onBack,
-}) => {
+export const loadGame = (kifu: string) => {
+  console.log("Load Game");
   const foobar: Record<string, PieceType> = {
     NN: PieceType.None,
     OU: PieceType.King1,
@@ -37,7 +33,7 @@ const KifuPlay: React.FC<{ kifu: string; onBack: () => void }> = ({
     [PlayerType.Black]: [],
     [PlayerType.White]: [],
   };
-  const json: IJSONKifuFormat = Parsers.parseKIF(kifu);
+  const json = Parsers.parseKIF(kifu);
   if (json && json.initial && json.initial.data) {
     json.initial.data.board.map((rcol, rcolIndex) =>
       rcol.map((cell, rrowIndex) => {
@@ -51,13 +47,13 @@ const KifuPlay: React.FC<{ kifu: string; onBack: () => void }> = ({
         }
       })
     );
-
     const hands0: [string, number][] = Object.entries(
       json.initial.data.hands[0]
     );
     const hands1: [string, number][] = Object.entries(
       json.initial.data.hands[1]
     );
+
     for (const kind in hands0) {
       const type = foobar[hands0[kind][0]];
       const count = hands0[kind][1];
@@ -72,23 +68,12 @@ const KifuPlay: React.FC<{ kifu: string; onBack: () => void }> = ({
     }
   }
   const currentPlayer = PlayerType.Black;
-  const initialGameState = {
+  const newGameState = {
     board,
     prevMove: null,
     moveHistoryString: null,
     holdPieces,
     currentPlayer,
   };
-
-  return (
-    <>
-      <ShogiGame
-        initialGameState={initialGameState}
-        mode={false}
-        initialKifu={kifu}
-        onBack={onBack}
-      />
-    </>
-  );
+  return newGameState;
 };
-export default KifuPlay;

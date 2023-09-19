@@ -10,11 +10,18 @@ import {
   BsSkipEndFill,
 } from "react-icons/bs";
 
-const Controller: React.FC<{
+const BoardButtons: React.FC<{
   isEditMode: boolean;
-  canButton: { rewind: boolean; foward: boolean; play: boolean };
+  canButton: {
+    rewind: boolean;
+    foward: boolean;
+    play: boolean;
+    pause: boolean;
+  };
   handleControllerButton: (btn: string) => void;
 }> = ({ isEditMode, canButton, handleControllerButton }) => {
+  console.log("BoardButtons");
+  //console.log(canButton);
   return (
     <HStack>
       {isEditMode ? (
@@ -49,14 +56,14 @@ const Controller: React.FC<{
       />
       {canButton.play ? (
         <IconButton
-          isDisabled={true}
+          isDisabled={!canButton.play}
           aria-label="再生"
           onClick={() => handleControllerButton("Play")}
           icon={<BsPlayBtnFill />}
         />
       ) : (
         <IconButton
-          isDisabled={true}
+          isDisabled={!canButton.pause}
           aria-label="停止"
           onClick={() => handleControllerButton("Pause")}
           icon={<BsPauseFill />}
@@ -78,4 +85,4 @@ const Controller: React.FC<{
     </HStack>
   );
 };
-export default Controller;
+export default BoardButtons;

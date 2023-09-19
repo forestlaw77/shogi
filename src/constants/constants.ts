@@ -20,20 +20,22 @@ export const PIECE_SIZE = {
 
 // Directions for possible piece moves.
 export const PIECE_DIRECTIONS = [
-  [0, -1],
-  [1, -1],
-  [1, 0],
-  [1, 1],
-  [0, 1],
-  [-1, 1],
-  [-1, 0],
-  [-1, -1],
-  [1, -2],
-  [-1, -2],
+  // [x, y]
+  [0, -1], // UP UP
+  [1, -1], // UR Upper Right
+  [1, 0], // RG Right
+  [1, 1], // LR Lower Right
+  [0, 1], // UD Under
+  [-1, 1], // LL Lower Left
+  [-1, 0], // LF Left
+  [-1, -1], // UL Upper Left
+  [1, -2], // UR2 Upper Right ... Knight
+  [-1, -2], // UL2 Upper Left  ... Knight
 ];
 
 // Movable ranges for different piece types.
 export const MOVABLE_RANGES: { [key in PieceType]: number[] } = {
+  // UP UR RG LR UD LL LF UL UR2 UL2
   [PieceType.None]: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   [PieceType.King1]: [1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
   [PieceType.King2]: [1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
@@ -183,3 +185,5 @@ export const pieceLetter = {
   [PieceType.PromotedLance]: "成香",
   [PieceType.PromotedPawn]: "と",
 };
+
+export const PLAYBACK_SPEED = 1000;

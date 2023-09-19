@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { VStack, Box, Image, SimpleGrid, Button } from "@chakra-ui/react";
-import ShogiGame from "./features/shogiGame/components/ShogiGame";
+import ShogiGame from "./components/model/Shogi";
 import KifuPlayer from "./features/kifuPlayer/components/KifuPlayer";
-import { generateInitialBoard } from "./utils/boardUtils";
 import { PieceType, Piece, PlayerType, GameState } from "./types/pieceTypes";
+import { generateInitialBoard } from "./utils/boardInitializer";
 
 const Shogi = () => {
   const enum GameType {

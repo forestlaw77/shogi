@@ -1,8 +1,8 @@
 import { Box, Image } from "@chakra-ui/react";
-import { BOARD_SIZE } from "../../../constants/constants";
-import { Piece } from "../../../types/pieceTypes";
 import RenderCell from "./Cell";
-import { isMovable } from "../../../utils/boardUtils";
+import { Piece } from "../../types/pieceTypes";
+import { isMovable } from "../../utils/boardUtils";
+import { BOARD_SIZE } from "../../constants/constants";
 
 interface BoardProps {
   board: (Piece | null)[][];

@@ -1,13 +1,13 @@
 import { HStack, Image, Box, Flex, Text } from "@chakra-ui/react";
 import {
   DirType,
-  Piece,
   HoldPiece,
-  PlayerType,
+  Piece,
   PieceType,
-} from "../../../types/pieceTypes";
-import { PIECE_SIZE } from "../../../constants/constants";
-import { getImage } from "../../../utils/boardUtils";
+  PlayerType,
+} from "../../types/pieceTypes";
+import { PIECE_SIZE } from "../../constants/constants";
+import { getImage } from "../../utils/imageUtils";
 
 interface KomadaiProps {
   holdPieces: HoldPiece[];

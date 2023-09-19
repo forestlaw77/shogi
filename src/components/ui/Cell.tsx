@@ -1,7 +1,7 @@
 import { Image, Box } from "@chakra-ui/react";
-import { Piece } from "../../../types/pieceTypes";
-import { getImage } from "../../../utils/boardUtils";
-import { BOARD_SIZE, PIECE_SIZE } from "../../../constants/constants";
+import { Piece } from "../../types/pieceTypes";
+import { getImage } from "../../utils/imageUtils";
+import { BOARD_SIZE, PIECE_SIZE } from "../../constants/constants";
 
 interface CellProps {
   row: number;

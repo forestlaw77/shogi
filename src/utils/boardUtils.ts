@@ -1,125 +1,16 @@
-import { PieceType, DirType, Piece, PlayerType } from "../types/pieceTypes";
+import {
+  PieceType,
+  DirType,
+  Piece,
+  PlayerType,
+  GameState,
+  Cell,
+} from "../types/pieceTypes";
 import {
   ORIGINAL_PIECES,
-  PIECES,
   PROMOTION_PIECES,
   TAP_DELAY,
 } from "../constants/constants";
-
-/**
- * Generate the initial game board for a shogi game.
- *
- * @returns {Piece[][]} The initial game board represented as a 2D array of Cell objects.
- */
-export const generateInitialBoard = () => {
-  // Generate an initial shogi board
-  const board: Piece[][] = [
-    // 1st line
-    [
-      PieceType.Lance,
-      PieceType.Knight,
-      PieceType.Silver,
-      PieceType.Gold,
-      PieceType.King2,
-      PieceType.Gold,
-      PieceType.Silver,
-      PieceType.Knight,
-      PieceType.Lance,
-    ].map((type) => ({
-      type,
-      owner: PlayerType.White,
-      direction: DirType.Down,
-    })),
-    // 2nd line
-    [
-      null,
-      PieceType.Rook,
-      null,
-      null,
-      null,
-      null,
-      null,
-      PieceType.Bishop,
-      null,
-    ].map((type) =>
-      type
-        ? {
-            type,
-            owner: PlayerType.White,
-            direction: DirType.Down,
-          }
-        : null
-    ),
-    // 3rd line
-    Array(9).fill({
-      type: PieceType.Pawn,
-      owner: PlayerType.White,
-      direction: DirType.Down,
-    }),
-    // 4th line
-    Array(9).fill(null),
-    // 5th line
-    Array(9).fill(null),
-    // 6th line
-    Array(9).fill(null),
-    // 7th line
-    Array(9).fill({
-      type: PieceType.Pawn,
-      owner: PlayerType.Black,
-      direction: DirType.Up,
-    }),
-    // 8th line
-    [
-      null,
-      PieceType.Bishop,
-      null,
-      null,
-      null,
-      null,
-      null,
-      PieceType.Rook,
-      null,
-    ].map((type) =>
-      type
-        ? {
-            type,
-            owner: PlayerType.Black,
-            direction: DirType.Up,
-          }
-        : null
-    ),
-    // 9th line
-    [
-      PieceType.Lance,
-      PieceType.Knight,
-      PieceType.Silver,
-      PieceType.Gold,
-      PieceType.King1,
-      PieceType.Gold,
-      PieceType.Silver,
-      PieceType.Knight,
-      PieceType.Lance,
-    ].map((type) => ({
-      type,
-      owner: PlayerType.Black,
-      direction: DirType.Up,
-    })),
-  ];
-
-  return board;
-};
-
-/**
- * Retrieves the image URL for a given piece type and direction.
- *
- * @param {PieceType} type - The type of the piece.
- * @param {DirType} direction - The direction of the piece.
- * @returns {string} The URL of the image representing the piece.
- */
-export const getImage = (type?: PieceType, direction?: DirType) => {
-  const piece = PIECES.find((piece) => piece.type === type);
-  return direction === DirType.Up ? piece?.UpImage : piece?.DownImage;
-};
 
 /**
  * Checks if a cell is movable.
@@ -241,34 +132,99 @@ export const handleCellClick = (
   }
 };
 
-/**
- * Convert a numeric digit to its corresponding Kanji character (1-9).
- *
- * @param {number} number - The numeric digit (1-9) to convert to Kanji.
- * @returns {string} The Kanji representation of the numeric digit, or "Invalid Number" if the input is out of range.
- */
-export const number2Kanji = (number: number) => {
-  const kanjiNumbers = ["一", "二", "三", "四", "五", "六", "七", "八", "九"];
-
-  if (number >= 1 && number <= 9) {
-    return kanjiNumbers[number - 1];
-  } else {
-    return "Invalid Number";
-  }
-};
-export const number2Zenkaku = (number: number) => {
-  const zenkakuNumbers = ["１", "２", "３", "４", "５", "６", "７", "８", "９"];
-
-  if (number >= 1 && number <= 9) {
-    return zenkakuNumbers[number - 1];
-  } else {
-    return "Invalid Number";
-  }
-};
-
 export const kanji2Number = (letter: string) => {
   const kanjiNumbers = ["一", "二", "三", "四", "五", "六", "七", "八", "九"];
   const number: number = kanjiNumbers.indexOf(letter);
 
   return number < 0 ? number : number + 1;
+};
+
+/**
+ * Checks if a given row and column match the previous destination position.
+ *
+ * @param {number} row - The row to check.
+ * @param {number} col - The column to check.
+ * @returns {boolean} True if the row and column match the previous destination position, false otherwise.
+ */
+const prevDstPosition: { row: number; col: number } = { row: -1, col: -1 };
+export const isSameDst = (row: number, col: number) => {
+  const result = prevDstPosition.row === row && prevDstPosition.col === col;
+  setPrevDstPosition(row, col);
+  return result;
+};
+
+export const setPrevDstPosition = (row: number, col: number) => {
+  prevDstPosition.row = row;
+  prevDstPosition.col = col;
+};
+
+export const resetPrevDstPosition = () => {
+  setPrevDstPosition(-1, -1);
+};
+
+/**
+ * Removes a piece from the player's hold pieces.
+ *
+ * @param {GameState["holdPieces"]} holdPieces - The current hold pieces state.
+ * @param {PlayerType} owner - The owner of the piece to remove.
+ * @param {PieceType} pieceType - The type of the piece to remove.
+ * @returns {GameState["holdPieces"]} The updated hold pieces state.
+ */
+export const removeHoldPiece = (
+  holdPieces: GameState["holdPieces"],
+  owner: PlayerType,
+  pieceType?: PieceType
+) => {
+  const newHoldPieces = structuredClone(holdPieces);
+  const ownerKey =
+    owner === PlayerType.Black ? PlayerType.Black : PlayerType.White;
+  const targetPieceIndex = newHoldPieces[ownerKey].findIndex(
+    (piece) => piece.type === pieceType
+  );
+
+  if (targetPieceIndex !== -1) {
+    const targetPiece = newHoldPieces[ownerKey][targetPieceIndex];
+    if (targetPiece.count > 0) {
+      targetPiece.count--;
+
+      if (targetPiece.count === 0) {
+        newHoldPieces[ownerKey].splice(targetPieceIndex, 1);
+      }
+    }
+  }
+
+  return newHoldPieces;
+};
+
+/**
+ * Adds a piece to the player's hold pieces.
+ *
+ * @param {GameState["holdPieces"]} holdPieces - The current hold pieces state.
+ * @param {PlayerType} owner - The owner of the piece to add.
+ * @param {PieceType | null} pieceType - The type of the piece to add.
+ * @returns {GameState["holdPieces"]} The updated hold pieces state.
+ */
+export const addHoldPiece = (
+  holdPieces: GameState["holdPieces"],
+  owner: PlayerType,
+  pieceType: PieceType | null
+) => {
+  const newHoldPieces = structuredClone(holdPieces);
+  const ownerKey =
+    owner === PlayerType.Black ? PlayerType.Black : PlayerType.White;
+  const targetPiece = newHoldPieces[ownerKey].find(
+    (piece) => piece.type === pieceType
+  );
+
+  if (targetPiece) {
+    targetPiece.count++;
+  } else if (pieceType) {
+    newHoldPieces[ownerKey].push({ type: pieceType, count: 1 });
+  }
+
+  return newHoldPieces;
+};
+
+export const havePiece = (cell: Cell) => {
+  return cell.piece !== null;
 };
